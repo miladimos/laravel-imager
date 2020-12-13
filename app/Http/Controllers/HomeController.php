@@ -25,6 +25,7 @@ class HomeController extends Controller
         // $img = Image::make($request->file('file'))->fit(200, 200)->save($request->file('file')->getClientOriginalName());
         // $img = Image::canvas(800, 600, '#ccc');
 
+        $img = Image::make($request->file('file'))->greyscale();
         return $img->response();
         return redirect()->route('home');
     }
