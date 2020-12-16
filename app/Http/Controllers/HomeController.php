@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 
@@ -20,7 +21,7 @@ class HomeController extends Controller
     public function store(Request $request)
     {
 
-        $uploadedFilePath = $this->upload($request->file('file'), 'avatars\advisors');
+        // $uploadedFilePath = $this->upload($request->file('file'), 'avatars\advisors');
 
 
         // return $request->file('file')->getClientOriginalExtension();
@@ -29,7 +30,7 @@ class HomeController extends Controller
         // $img = Image::make($request->file('file'))->fit(200, 200)->save($request->file('file')->getClientOriginalName());
         // $img = Image::canvas(800, 600, '#ccc');
 
-        // $img = Image::make($request->file('file'))->resize();
+        // $img = Image::make($request->file('file'))->resize(200,10);
         // return $img->response();
         // return redirect()->route('home');
     }
