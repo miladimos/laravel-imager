@@ -20,7 +20,8 @@ class HomeController extends Controller
     public function store(Request $request)
     {
 
-        $this->upload($request->file('file'), 'avatars\advisors');
+        $uploadedFilePath = $this->upload($request->file('file'), 'avatars\advisors');
+
 
         // return $request->file('file')->getClientOriginalExtension();
 

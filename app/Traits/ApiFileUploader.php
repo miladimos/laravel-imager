@@ -11,20 +11,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\Api\v1\Site\FileUploadRequest;
+use App\Models\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 trait ApiFileUploader
 {
 
     /**
+     * Default Upload Folder Name
+     *
      * @var string
      */
-    protected $uploadPath = 'uploads';
-
-    /**
-     * @var
-     */
-    public $folderName;
+    protected $uploadfolderName = 'uploads';
 
     /**
      * @var string
@@ -37,6 +35,26 @@ trait ApiFileUploader
      * @var string
      */
     private $ds = DIRECTORY_SEPARATOR;
+
+    /**
+     * File Model
+     *
+     * @var string
+     */
+    private $model = File::class;
+
+    /**
+     * Image Sizes
+     *
+     * @var string
+     */
+    private $sizes = [
+        'thumbnail' => '',
+        'small' => '',
+        'medium' => '',
+        'original' => '',
+    ];
+
 
     /**
      * @return bool
@@ -150,9 +168,12 @@ trait ApiFileUploader
 
 
 
-    protected function upload(UploadedFile $uploadedFile, $path = 'uploads', $filename = 'file', $disk ='' , $mimes = '')
+    protected function upload(UploadedFile $uploadedFile, $path = 'uploads', $filename = 'file', $disk ='public' , $mimes = '')
     {
 
+        $model = resolve($this->model);
+
+        dd($model);
         if($uploadedFile->isValid()) {
 
             $year = Carbon::now()->year;
@@ -173,7 +194,6 @@ trait ApiFileUploader
 
             $finalFileName = $fileName;
 
-            dd(public_path($uploadPath . $finalFileName));
 
 
             $file->move(public_path($finalFileName), $fileName);
