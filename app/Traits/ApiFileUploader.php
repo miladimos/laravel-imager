@@ -167,7 +167,48 @@ trait ApiFileUploader
     }
 
 
+    public function __invoke(UploadContactsRequest $request, Group $group)
+    {
+        if ($request->file('filename')->isValid()) {
 
+            $fileUpload = new FileUpload;
+            $fileUpload->user_id = auth()->user()->id;
+            $fileUpload->group_id = $group->id;
+            $fileUpload->filename = $request->file('filename')->hashName();
+            $fileUpload->extension = $request->file('filename')->extension();
+            $fileUpload->filesize = $request->file('filename')->getClientSize();
+            $fileUpload->location = $request->file('filename')->store('contact-files');
+            $fileUpload->save();
+            toastr()->success('Data has been saved successfully!');
+
+            flash()->success('Your file is currently being processed. You will be notified when done.');
+
+            //UploadContacts::dispatch($fileUpload, $group)->onQueue('file-uploads');
+            dispatch(new UploadContacts($fileUpload, $group))->onQueue('file-uploads');
+        } else {
+            flash()->error('There was a problem uploading your file. Please try again.');
+        }
+
+        return back();
+
+        // public function rules()
+        // {
+        //     $mime_types = [
+        //         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        //         'application/vnd.ms-excel',
+        //         'application/vnd.ms-excel.addin.macroenabled.12',
+        //         'application/vnd.ms-excel.sheet.binary.macroenabled.12',
+        //         'application/vnd.ms-excel.sheet.macroenabled.12',
+        //         'application/vnd.oasis.opendocument.spreadsheet',
+        //         'text/csv',
+        //         'text/plain'
+        //     ];
+
+        //     return [
+        //         'filename' => 'required|file|mimetypes:'.implode($mime_types,',').'|max:51200'
+        //     ];
+        // }
+    }
     protected function upload(UploadedFile $uploadedFile, $path = 'uploads', $filename = 'file', $disk ='public' , $mimes = '')
     {
 

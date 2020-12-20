@@ -13,6 +13,7 @@
                             {{ session('status') }}
                         </div>
                     @endif
+                    <img src="{{ asset('/uploads/2020/12/20/13.jpg') }}" width="100">
                     <h2>Upload Image </h2>
                     <form action="{{ route('upload') }}" method="POST" enctype="multipart/form-data">
                         @csrf

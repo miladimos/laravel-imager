@@ -9,7 +9,7 @@ class File extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['path', 'type'];
+    protected $guarded = [];
 
-    
+
 }
