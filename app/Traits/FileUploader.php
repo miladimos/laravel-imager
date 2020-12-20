@@ -9,14 +9,21 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 trait FileUploader
 {
-     /**
+    /**
+     * Default File Disk
+     *
+     * @var string
+     */
+    private $disk = 'public';
+
+    /**
      * Default Upload Folder Name
      *
      * @var string
      */
     private $uploadfolderName = 'uploads';
 
-  /**
+    /**
      * Directory Seperator
      *
      * @var string
@@ -29,12 +36,6 @@ trait FileUploader
      * @var string
      */
     private $model = File::class;
-
-        /**
-     * @var string
-     */
-    public $rule = 'image|max:2000';
-
 
     /**
      * Image Sizes
@@ -54,6 +55,7 @@ trait FileUploader
 
     public function uploadSingleImage(UploadedFile $uploadedFile, $path = 'uploads')
     {
+        // dd($uploadedFile->getType());
         if($uploadedFile->isValid()) {
             $model = resolve($this->model);
 
@@ -65,12 +67,14 @@ trait FileUploader
             $fileName = $uploadedFile->getClientOriginalName();
             $fileExt  = $uploadedFile->getClientOriginalExtension();
             $mimeType = $uploadedFile->getClientMimeType();
+            $fileSize = $uploadedFile->getSize();
 
             $uploadPath = "{$this->ds}{$path}{$this->ds}{$year}{$this->ds}{$month}{$this->ds}{$day}";
 
             $fullUploadedPath = public_path($uploadPath . $this->ds . $fileName);
 
             $dirPath = public_path($uploadPath);
+
             $this->mkdir_if_not_exists($dirPath);
 
             if(file_exists($fullUploadedPath)) {
@@ -102,17 +106,14 @@ trait FileUploader
 
     }
 
-    public function uploadOne(Request $request, $filename = null, $folder = null,  $disk = 'public')
+    // $path = $request->photo->storeAs('images', 'filename.jpg', 'disk');
+
+
+    public function uploadOne(UploadedFile $uploadedFile, $filename ='', $folder = null,  $disk = 'public')
     {
-        $fileName = !is_null($filename) ? $filename : Str::random(25);
+        $fileName = !is_null($filename) ? $filename : $uploadedFile->getClientOriginalName();
 
-        $file = $uploadedFile->storeAs($folder, $name.'.'.$uploadedFile->getClientOriginalExtension(), $disk);
-
-        $path = $request->photo->path();
-
-        $extension = $request->photo->extension();
-        $path = $request->photo->store('images');
-        $path = $request->photo->storeAs('images', 'filename.jpg');
+        $file = $uploadedFile->move($folder, $name.'.'.$uploadedFile->getClientOriginalExtension(), $disk);
 
         return $file;
     }
