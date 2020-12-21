@@ -80,8 +80,7 @@ trait FileUploader
             if(file_exists($fullUploadedPath)) {
                 $finalFileName = Carbon::now()->timestamp . "-{$fileName}";
 
-                $img->save($dirPath . $finalFileName);
-
+                $img->save(public_path($uploadPath . $this->ds . $finalFileName));
                 return response()->json([
                     'data' => [
                         'url' => url($uploadPath . $this->ds . $finalFileName)
