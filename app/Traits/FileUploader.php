@@ -69,7 +69,7 @@ trait FileUploader
             $mimeType = $uploadedFile->getClientMimeType();
             $fileSize = $uploadedFile->getSize();
 
-            $uploadPath = "{$this->ds}{$path}{$this->ds}{$year}{$this->ds}{$month}{$this->ds}{$day}";
+            $uploadPath = "{$path}{$this->ds}{$year}{$this->ds}{$month}{$this->ds}{$day}";
 
             $fullUploadedPath = public_path($uploadPath . $this->ds . $fileName);
 
@@ -81,6 +81,18 @@ trait FileUploader
                 $finalFileName = Carbon::now()->timestamp . "-{$fileName}";
 
                 $img->save(public_path($uploadPath . $this->ds . $finalFileName));
+
+                $model->create([
+                    'file_name' => $finalFileName,
+                    'original_name' => $fileName,
+                    'file_path' => url($uploadPath . $this->ds . $finalFileName),
+                    'file_size' => $fileSize,
+                    'mime_type' => $mimeType,
+                    'file_ext'  => $fileExt,
+                    'width' => $img->width(),
+                    'height' => $img->height(),
+                ]);
+
                 return response()->json([
                     'data' => [
                         'url' => url($uploadPath . $this->ds . $finalFileName)
@@ -90,6 +102,16 @@ trait FileUploader
 
             $img->save($fullUploadedPath);
 
+            $model->create([
+                'file_name' => $fileName,
+                'original_name' => $fileName,
+                'file_path' => url($uploadPath . $this->ds . $fileName),
+                'file_size' => $fileSize,
+                'mime_type' => $mimeType,
+                'file_ext'  => $fileExt,
+                'width' => $img->width(),
+                'height' => $img->height(),
+            ]);
             // $uploadedFile->move(public_path($uploadPath), $fileName);
 
             return response()->json([

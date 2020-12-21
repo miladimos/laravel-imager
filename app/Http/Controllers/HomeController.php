@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\File;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
@@ -15,21 +16,22 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $file = File::latest()->first();
+        return view('home', compact('file'));
     }
 
     public function store(Request $request)
     {
 
         $uploadedFilePath = $this->uploadSingleImage($request->file('file'));
-        dd($uploadedFilePath);
+        // dd($uploadedFilePath);
 
         // $img = Image::make($request->file('file'))->fit(200, 200)->save($request->file('file')->getClientOriginalName());
 
 
         // $img = Image::make($request->file('file'))->resize(200,10);
         // return $img->response();
-        // return redirect()->route('home');
+        return redirect()->route('home');
     }
 
 //     public function fileUpload(Request $req){
