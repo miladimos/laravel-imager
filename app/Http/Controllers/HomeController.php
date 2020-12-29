@@ -26,12 +26,43 @@ class HomeController extends Controller
         $uploadedFilePath = $this->uploadSingleImage($request->file('file'));
         // dd($uploadedFilePath);
 
-        // $img = Image::make($request->file('file'))->fit(200, 200)->save($request->file('file')->getClientOriginalName());
-
-
-        // $img = Image::make($request->file('file'))->resize(200,10);
-        // return $img->response();
         return redirect()->route('home');
+    }
+
+      /**
+     * check timestamp and return download
+     *
+     * @param $id
+     * @return BinaryFileResponse
+     * @throws InternalErrorException
+     */
+    public function download($file)
+    {
+        /** @var File $file */
+        $file = File::query()
+            ->where("id", $file)
+            ->orWhere("name", $file)
+            ->firstOrFail();
+
+        $config = filemanager_config();
+
+        if ($file->isPublic) {
+            return $file->download();
+        } else {
+            $secret = "";
+            if ($config['secret']) {
+                $secret = $config['secret'];
+            }
+
+            $hash = $secret . $file->id . request()->ip() . request('t');
+
+            if ((Carbon::createFromTimestamp(request('t')) > Carbon::now()) &&
+                Hash::check($hash, request('mac'))) {
+                return $file->download();
+            } else {
+                throw new InternalErrorException("link not valid");
+            }
+        }
     }
 
 //     public function fileUpload(Request $req){

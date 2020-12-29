@@ -288,6 +288,26 @@ trait ApiFileUploader
 
     }
 
+
+
+    /**
+     * generate and unique & random name
+     *
+     * @param int $length
+     * @return string
+     */
+    protected function generateRandomName(int $length = 15)
+    {
+        do {
+            $randomName = Str::random($length);
+            $check = File::query()
+                ->where("name", $randomName)
+                ->first();
+        } while (!empty($check));
+
+        return $randomName;
+    }
+
     // public function up()
     // {
     //     $image_name = str_random(20);
@@ -364,6 +384,26 @@ trait ApiFileUploader
     //                 ->with('fileName',$input['imagename']);
     //         }
     // }
+
+
+
+
+
+
+//     foreach ($sizes as $size) {
+//         $sizeUploadPath = $uploadPath . "{$size}/";
+//         if (!is_dir($sizeUploadPath)) mkdir($sizeUploadPath);
+//         $sizeName = $sizeUploadPath . $fileName;
+//         \Intervention\Image\Facades\Image::make($filePath)->fit($size, $size, function ($constraint) {
+//             $constraint->aspectRatio();
+// //                $constraint->upsize();
+//         })->save($sizeName);
+//     }
+
+//     $thumbUploadPath = $uploadPath . "thumb/";
+//     if (!is_dir($thumbUploadPath)) mkdir($thumbUploadPath);
+//     $thumbPath = $thumbUploadPath . $fileName;
+//     copy($uploadPath . "{$this->getThumbSize()}/" . $fileName, $thumbPath);
 }
 
 

@@ -18,3 +18,5 @@ Auth::routes();
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/upload', [HomeController::class, 'store'])->name('upload');
+Route::post('/download', [HomeController::class, 'download'])->name('download');
+

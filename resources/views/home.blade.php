@@ -13,12 +13,14 @@
                             {{ session('status') }}
                         </div>
                     @endif
-                    <img src="{{ $file->file_path }}" width="100">
-                    {{ $file->file_ext}}
-                    {{ $file->mime_type}}
-                    {{ $file->file_size}}
-                    {{ $file->width}}
-                    {{ $file->height}}
+                    @if($file)
+                        <img src="{{ $file->file_path }}" width="100">
+                        {{ $file->file_ext}}
+                        {{ $file->mime_type}}
+                        {{ $file->file_size}}
+                        {{ $file->width}}
+                        {{ $file->height}}
+                    @endif
                     <h2>Upload Image </h2>
                     <form action="{{ route('upload') }}" method="POST" enctype="multipart/form-data">
                         @csrf
