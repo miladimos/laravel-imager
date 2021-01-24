@@ -14,6 +14,7 @@
                         </div>
                     @endif
                     @if($file)
+                    {{ $file->id}}
                         <img src="{{ $file->file_path }}" width="100">
                         {{ $file->file_ext}}
                         {{ $file->mime_type}}
