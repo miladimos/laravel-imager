@@ -6,6 +6,7 @@ use App\Models\File;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Validator;
 
 class HomeController extends Controller
 {
@@ -22,9 +23,11 @@ class HomeController extends Controller
 
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required'
+        ]);
 
         $uploadedFilePath = $this->uploadSingleImage($request->file('file'));
-        // dd($uploadedFilePath);
 
         return redirect()->route('home');
     }

@@ -24,7 +24,7 @@ trait FileUploader
      *
      * @var string
      */
-    private $uploadfolderName = 'uploads';
+    private $defaultUploadfolderName = 'upload';
 
     /**
      * Directory Seperator
@@ -56,11 +56,100 @@ trait FileUploader
     ];
 
 
-    private $mimes = [
-        'images' => 'jpg,jpeg,png,',
-        'documents' => 'doc',
-    ];
+    public function uploadSingleImage(UploadedFile $uploadedFile, $path = null)
+    {
 
+        $path = $path ?? $this->defaultUploadfolderName;
+
+        if ($uploadedFile->isValid()) {
+            $model = resolve($this->model);
+
+            $image = Image::make($uploadedFile->getRealPath());
+            $year = Carbon::now()->year;
+            $month = Carbon::now()->month;
+            $day = Carbon::now()->day;
+
+            $fileName = $uploadedFile->getClientOriginalName();
+            $fileExt  = $uploadedFile->getClientOriginalExtension();
+            $mimeType = $uploadedFile->getClientMimeType();
+            $fileSize = $uploadedFile->getSize();
+
+            $uploadPath = "{$path}{$this->ds}{$year}{$this->ds}{$month}{$this->ds}{$day}";
+
+
+            $fullUploadedPath = public_path($uploadPath . $this->ds . $fileName);
+
+            $dirPath = public_path($uploadPath);
+
+            $this->mkdir_if_not_exists($dirPath);
+
+            if (file_exists($fullUploadedPath)) {
+                $finalFileName = Carbon::now()->timestamp . "-{$fileName}";
+
+                $image->save(public_path($uploadPath . $this->ds . $finalFileName));
+
+                $model->create([
+                    'file_name' => $finalFileName,
+                    'original_name' => $fileName,
+                    'file_path' => url($uploadPath . $this->ds . $finalFileName),
+                    'file_size' => $fileSize,
+                    'mime_type' => $mimeType,
+                    'file_ext'  => $fileExt,
+                    'width' => $image->width(),
+                    'height' => $image->height(),
+                ]);
+
+                return response()->json([
+                    'data' => [
+                        'url' => url($uploadPath . $this->ds . $finalFileName)
+                    ]
+                ]);
+            }
+
+            $image->save($fullUploadedPath);
+
+            $model->create([
+                'file_name' => $fileName,
+                'original_name' => $fileName,
+                'file_path' => url($uploadPath . $this->ds . $fileName),
+                'file_size' => $fileSize,
+                'mime_type' => $mimeType,
+                'file_ext'  => $fileExt,
+                'width' => $image->width(),
+                'height' => $image->height(),
+            ]);
+            // $uploadedFile->move(public_path($uploadPath), $fileName);
+
+            return response()->json([
+                'data' => [
+                    'url' => url($uploadPath . $this->ds . $fileName)
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'data' => 'File is Broken Or Not Valid!'
+        ]);
+    }
+
+    // $path = $request->photo->storeAs('images', 'filename.jpg', 'disk');
+
+
+    public function uploadOne(UploadedFile $uploadedFile, $filename = '', $folder = null,  $disk = 'public')
+    {
+        $fileName = !is_null($filename) ? $filename : $uploadedFile->getClientOriginalName();
+
+        $file = $uploadedFile->move($folder, $filename . '.' . $uploadedFile->getClientOriginalExtension(), $disk);
+
+        return $file;
+    }
+
+    function mkdir_if_not_exists($dirPath)
+    {
+        if (!file_exists($dirPath)) {
+            mkdir($dirPath, 0777, true);
+        }
+    }
 
     /**
      * Method for determining whether the uploaded file is
@@ -82,106 +171,5 @@ trait FileUploader
         }
 
         return false;
-    }
-
-    public function uploadSingleImage(UploadedFile $uploadedFile, $path = 'uploads')
-    {
-
-        $validator = Validator::make($uploadedFile, $this->mimes['images']);
-
-        // dd($uploadedFile->getType());
-        if ($uploadedFile->isValid()) {
-            if (!$validator->fails()) {
-                $model = resolve($this->model);
-
-                $img = Image::make($uploadedFile->getRealPath());
-                $year = Carbon::now()->year;
-                $month = Carbon::now()->month;
-                $day = Carbon::now()->day;
-
-                $fileName = $uploadedFile->getClientOriginalName();
-                $fileExt  = $uploadedFile->getClientOriginalExtension();
-                $mimeType = $uploadedFile->getClientMimeType();
-                $fileSize = $uploadedFile->getSize();
-
-                $uploadPath = "{$path}{$this->ds}{$year}{$this->ds}{$month}{$this->ds}{$day}";
-
-                $fullUploadedPath = public_path($uploadPath . $this->ds . $fileName);
-
-                $dirPath = public_path($uploadPath);
-
-                $this->mkdir_if_not_exists($dirPath);
-
-                if (file_exists($fullUploadedPath)) {
-                    $finalFileName = Carbon::now()->timestamp . "-{$fileName}";
-
-                    $img->save(public_path($uploadPath . $this->ds . $finalFileName));
-
-                    $model->create([
-                        'file_name' => $finalFileName,
-                        'original_name' => $fileName,
-                        'file_path' => url($uploadPath . $this->ds . $finalFileName),
-                        'file_size' => $fileSize,
-                        'mime_type' => $mimeType,
-                        'file_ext'  => $fileExt,
-                        'width' => $img->width(),
-                        'height' => $img->height(),
-                    ]);
-
-                    return response()->json([
-                        'data' => [
-                            'url' => url($uploadPath . $this->ds . $finalFileName)
-                        ]
-                    ]);
-                }
-
-                $img->save($fullUploadedPath);
-
-                $model->create([
-                    'file_name' => $fileName,
-                    'original_name' => $fileName,
-                    'file_path' => url($uploadPath . $this->ds . $fileName),
-                    'file_size' => $fileSize,
-                    'mime_type' => $mimeType,
-                    'file_ext'  => $fileExt,
-                    'width' => $img->width(),
-                    'height' => $img->height(),
-                ]);
-                // $uploadedFile->move(public_path($uploadPath), $fileName);
-
-                return response()->json([
-                    'data' => [
-                        'url' => url($uploadPath . $this->ds . $fileName)
-                    ]
-                ]);
-            } else {
-                return response()->json([
-                    'data' => "File Format Valid is {}!"
-                ]);
-            }
-        }
-
-        return response()->json([
-            'data' => 'File is Broken Or Not Valid!'
-        ]);
-    }
-
-    // $path = $request->photo->storeAs('images', 'filename.jpg', 'disk');
-
-
-    public function uploadOne(UploadedFile $uploadedFile, $filename = '', $folder = null,  $disk = 'public')
-    {
-        $fileName = !is_null($filename) ? $filename : $uploadedFile->getClientOriginalName();
-
-        $file = $uploadedFile->move($folder, $name . '.' . $uploadedFile->getClientOriginalExtension(), $disk);
-
-        return $file;
-    }
-
-    function mkdir_if_not_exists($dirPath)
-    {
-        if (!file_exists($dirPath)) {
-            mkdir($dirPath, 0777, true);
-        }
     }
 }
