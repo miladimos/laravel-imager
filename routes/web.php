@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 
@@ -17,6 +18,6 @@ use App\Http\Controllers\HomeController;
 Auth::routes();
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::post('/upload', [HomeController::class, 'store'])->name('upload');
+Route::post('/upload2', [HomeController::class, 'store'])->name('upload');
+Route::get('/file', [HomeController::class, 'file'])->name('file');
 Route::post('/download', [HomeController::class, 'download'])->name('download');
-

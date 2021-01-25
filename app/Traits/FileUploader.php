@@ -56,7 +56,7 @@ trait FileUploader
     ];
 
 
-    public function uploadSingleImage(UploadedFile $uploadedFile, $path = null)
+    public function uploadOneImage(UploadedFile $uploadedFile, $path = null)
     {
 
         $path = $path ?? $this->defaultUploadfolderName;
@@ -135,13 +135,76 @@ trait FileUploader
     // $path = $request->photo->storeAs('images', 'filename.jpg', 'disk');
 
 
-    public function uploadOne(UploadedFile $uploadedFile, $filename = '', $folder = null,  $disk = 'public')
+    public function uploadOneFile(UploadedFile $uploadedFile, $path = null,  $disk = 'public')
     {
-        $fileName = !is_null($filename) ? $filename : $uploadedFile->getClientOriginalName();
 
-        $file = $uploadedFile->move($folder, $filename . '.' . $uploadedFile->getClientOriginalExtension(), $disk);
+        $path = $path ?? $this->defaultUploadfolderName;
 
-        return $file;
+        if ($uploadedFile->isValid()) {
+            $model = resolve($this->model);
+
+            $year = Carbon::now()->year;
+            $month = Carbon::now()->month;
+            $day = Carbon::now()->day;
+
+            $fileName = $uploadedFile->getClientOriginalName();
+            $fileExt  = $uploadedFile->getClientOriginalExtension();
+            $mimeType = $uploadedFile->getClientMimeType();
+            $fileSize = $uploadedFile->getSize();
+
+            $uploadPath = "{$path}{$this->ds}{$year}{$this->ds}{$month}{$this->ds}{$day}";
+
+
+            $fullUploadedPath = public_path($uploadPath . $this->ds . $fileName);
+
+
+            $dirPath = public_path($uploadPath);
+
+            $this->mkdir_if_not_exists($dirPath);
+
+            if (file_exists($fullUploadedPath)) {
+                $finalFileName = Carbon::now()->timestamp . "-{$fileName}";
+
+                $uploadedFile->move(public_path($uploadPath . $this->ds . $finalFileName . '.' . $fileExt));
+
+                $model->create([
+                    'file_name' => $finalFileName,
+                    'original_name' => $fileName,
+                    'file_path' => url($uploadPath . $this->ds . $finalFileName),
+                    'file_size' => $fileSize,
+                    'mime_type' => $mimeType,
+                    'file_ext'  => $fileExt,
+                ]);
+
+                return response()->json([
+                    'data' => [
+                        'url' => url($uploadPath . $this->ds . $finalFileName)
+                    ]
+                ]);
+            }
+
+            $uploadedFile->move($fullUploadedPath . '.' . $fileExt);
+
+            $model->create([
+                'file_name' => $fileName,
+                'original_name' => $fileName,
+                'file_path' => url($uploadPath . $this->ds . $fileName),
+                'file_size' => $fileSize,
+                'mime_type' => $mimeType,
+                'file_ext'  => $fileExt,
+            ]);
+            // $uploadedFile->move(public_path($uploadPath), $fileName);
+
+            return response()->json([
+                'data' => [
+                    'url' => url($uploadPath . $this->ds . $fileName)
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'data' => 'File is Broken Or Not Valid!'
+        ]);
     }
 
     function mkdir_if_not_exists($dirPath)

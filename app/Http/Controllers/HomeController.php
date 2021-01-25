@@ -21,15 +21,23 @@ class HomeController extends Controller
         return view('home', compact('file'));
     }
 
+    public function file()
+    {
+        return view('file');
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'file' => 'required'
         ]);
 
-        $uploadedFilePath = $this->uploadSingleImage($request->file('file'));
+        $uploadedImagePath = $this->uploadOneImage($request->file('file'));
 
-        return redirect()->route('home');
+        // $uploadedFilePath = $this->uploadOneFile($request->file('file'));
+
+
+        return redirect()->back();
     }
 
       /**
