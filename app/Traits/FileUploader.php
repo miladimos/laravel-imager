@@ -143,9 +143,9 @@ trait FileUploader
         if ($uploadedFile->isValid()) {
             $model = resolve($this->model);
 
-            $year = Carbon::now()->year;
+            $year  = Carbon::now()->year;
             $month = Carbon::now()->month;
-            $day = Carbon::now()->day;
+            $day   = Carbon::now()->day;
 
             $fileName = $uploadedFile->getClientOriginalName();
             $fileExt  = $uploadedFile->getClientOriginalExtension();
@@ -154,9 +154,7 @@ trait FileUploader
 
             $uploadPath = "{$path}{$this->ds}{$year}{$this->ds}{$month}{$this->ds}{$day}";
 
-
             $fullUploadedPath = public_path($uploadPath . $this->ds . $fileName);
-
 
             $dirPath = public_path($uploadPath);
 
@@ -165,7 +163,7 @@ trait FileUploader
             if (file_exists($fullUploadedPath)) {
                 $finalFileName = Carbon::now()->timestamp . "-{$fileName}";
 
-                $uploadedFile->move(public_path($uploadPath . $this->ds . $finalFileName . '.' . $fileExt));
+                $uploadedFile->move($dirPath, $finalFileName);
 
                 $model->create([
                     'file_name' => $finalFileName,
@@ -183,7 +181,7 @@ trait FileUploader
                 ]);
             }
 
-            $uploadedFile->move($fullUploadedPath . '.' . $fileExt);
+            $uploadedFile->move($dirPath, $fileName);
 
             $model->create([
                 'file_name' => $fileName,

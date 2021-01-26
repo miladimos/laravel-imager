@@ -32,9 +32,9 @@ class HomeController extends Controller
             'file' => 'required'
         ]);
 
-        $uploadedImagePath = $this->uploadOneImage($request->file('file'));
+        // $uploadedImagePath = $this->uploadOneImage($request->file('file'));
 
-        // $uploadedFilePath = $this->uploadOneFile($request->file('file'));
+        $uploadedFilePath = $this->uploadOneFile($request->file('file'));
 
 
         return redirect()->back();
