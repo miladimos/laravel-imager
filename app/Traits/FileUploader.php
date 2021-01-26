@@ -86,7 +86,7 @@ trait FileUploader
             if (file_exists($fullUploadedPath)) {
                 $finalFileName = Carbon::now()->timestamp . "-{$fileName}";
 
-                $image->save(public_path($uploadPath . $this->ds . $finalFileName));
+                $image->save($dirPath, $finalFileName);
 
                 $model->create([
                     'file_name' => $finalFileName,
@@ -133,7 +133,6 @@ trait FileUploader
     }
 
     // $path = $request->photo->storeAs('images', 'filename.jpg', 'disk');
-
 
     public function uploadOneFile(UploadedFile $uploadedFile, $path = null,  $disk = 'public')
     {
@@ -191,7 +190,6 @@ trait FileUploader
                 'mime_type' => $mimeType,
                 'file_ext'  => $fileExt,
             ]);
-            // $uploadedFile->move(public_path($uploadPath), $fileName);
 
             return response()->json([
                 'data' => [
