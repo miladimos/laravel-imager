@@ -86,7 +86,7 @@ trait FileUploader
             if (file_exists($fullUploadedPath)) {
                 $finalFileName = Carbon::now()->timestamp . "-{$fileName}";
 
-                $image->save($dirPath, $finalFileName);
+                $image->save($dirPath . $this->ds .  $finalFileName);
 
                 $model->create([
                     'file_name' => $finalFileName,
@@ -201,6 +201,11 @@ trait FileUploader
         return response()->json([
             'data' => 'File is Broken Or Not Valid!'
         ]);
+    }
+
+    public function deleteImage($image)
+    {
+        //
     }
 
     function mkdir_if_not_exists($dirPath)
